@@ -1,0 +1,26 @@
+{
+  "name": "js-autodiff",
+  "version": "1.0.0",
+  "description": "Auto Differentiation ",
+  "main": "autodiff.js",
+  "dependencies": {
+    "uglify-js": "^1.0.1"
+  },
+  "devDependencies": {},
+  "scripts": {
+    "test": "node examples.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/cccfork/js-autodiff.git"
+  },
+  "keywords": [
+    "Diff"
+  ],
+  "author": "",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/cccfork/js-autodiff/issues"
+  },
+  "homepage": "https://github.com/cccfork/js-autodiff#readme"
+}
