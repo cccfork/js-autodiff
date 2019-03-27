@@ -3,104 +3,104 @@ var uglify = require("uglify-js"),
 		pro = uglify.uglify,
 		vm = require('vm');
 
-function Dual(a, b) {
-	return {a: a, b: b || 0};
+function Dual(v, g) {
+	return {v: v, g: g || 0};
 }
 
 var AD = {
 	neg: function(x) {
-		return Dual(-x.a, -x.b);
+		return Dual(-x.v, -x.g);
 	},
 	incr: function(x) {
-		++x.a;
+		++x.v;
 	},
 	decr: function(x) {
-		--x.a;
+		--x.v;
 	},
-	gt: function(x0, x1) {
-		return x0.a > x1.a;
+	gt: function(x, y) {
+		return x.v > y.v;
 	},
-	gte: function(x0, x1) {
-		return x0.a >= x1.a;
+	gte: function(x, y) {
+		return x.v >= y.v;
 	},
-	lt: function(x0, x1) {
-		return x0.a < x1.a;
+	lt: function(x, y) {
+		return x.v < y.v;
 	},
-	lte: function(x0, x1) {
-		return x0.a <= x1.a;
+	lte: function(x, y) {
+		return x.v <= y.v;
 	},
-	eq: function(x0, x1) {
-		return x0.a == x1.a;
+	eq: function(x, y) {
+		return x.v == y.v;
 	},
-	add: function(x0, x1) {
-		return Dual(x0.a + x1.a, x0.b + x1.b);
+	add: function(x, y) {
+		return Dual(x.v + y.v, x.g + y.g);
 	},
-	sub: function(x0, x1) {
-		return Dual(x0.a - x1.a, x0.b - x1.b);
+	sub: function(x, y) {
+		return Dual(x.v - y.v, x.g - y.g);
 	},
-	mul: function(x0, x1) {
-		return Dual(x0.a * x1.a, x0.a * x1.b + x1.a * x0.b);
+	mul: function(x, y) {
+		return Dual(x.v * y.v, x.v * y.g + y.v * x.g);
 	},
-	div: function(x0, x1) {
-		return Dual(x0.a / x1.a, (x1.a * x0.b - x0.a * x1.b) / (x1.a * x1.a));
+	div: function(x, y) {
+		return Dual(x.v / y.v, (y.v * x.g - x.v * y.g) / (y.v * y.v));
 	},
-	addAssign: function(x0, x1) {
-		var sum = AD.add(x0, x1);
-		x0.a = sum.a;
-		x0.b = sum.b;
+	addAssign: function(x, y) {
+		var sum = AD.add(x, y);
+		x.v = sum.v;
+		x.g = sum.g;
 	},
-	subAssign: function(x0, x1) {
-		var diff = AD.sub(x0, x1);
-		x0.a = diff.a;
-		x0.b = diff.b;
+	subAssign: function(x, y) {
+		var diff = AD.sub(x, y);
+		x.v = diff.v;
+		x.g = diff.g;
 	},
-	mulAssign: function(x0, x1) {
-		var prod = AD.mul(x0, x1);
-		x0.a = prod.a;
-		x0.b = prod.b;
+	mulAssign: function(x, y) {
+		var prod = AD.mul(x, y);
+		x.v = prod.v;
+		x.g = prod.g;
 	},
-	divAssign: function(x0, x1) {
-		var quot = AD.div(x0, x1);
-		x0.a = quot.a;
-		x0.b = quot.b;
+	divAssign: function(x, y) {
+		var quot = AD.div(x, y);
+		x.v = quot.v;
+		x.g = quot.g;
 	},
 	sqrt: function(x) {
-		return Dual(Math.sqrt(x.a), x.b * 0.5 / Math.sqrt(x.a));
+		return Dual(Math.sqrt(x.v), x.g * 0.5 / Math.sqrt(x.v));
 	},
 	sin: function(x) {
-		return Dual(Math.sin(x.a), x.b * Math.cos(x.a));
+		return Dual(Math.sin(x.v), x.g * Math.cos(x.v));
 	},
 	cos: function(x) {
-		return Dual(Math.cos(x.a), -x.b * Math.sin(x.a));
+		return Dual(Math.cos(x.v), -x.g * Math.sin(x.v));
 	},
 	tan: function(x) {
-		return Dual(Math.tan(x.a), x.b / (Math.cos(x.a) * Math.cos(x.a)));
+		return Dual(Math.tan(x.v), x.g / (Math.cos(x.v) * Math.cos(x.v)));
 	},
 	asin: function(x) {
-		return Dual(Math.asin(x.a), x.b / Math.sqrt(1 - x.a * x.a));
+		return Dual(Math.asin(x.v), x.g / Math.sqrt(1 - x.v * x.v));
 	},
 	acos: function(x) {
-		return Dual(Math.acos(x.a), -x.b / Math.sqrt(1 - x.a * x.a));
+		return Dual(Math.acos(x.v), -x.g / Math.sqrt(1 - x.v * x.v));
 	},
 	atan: function(x) {
-		return Dual(Math.atan(x.a), x.b / (1 + x.a * x.a));
+		return Dual(Math.atan(x.v), x.g / (1 + x.v * x.v));
 	},
 	log: function(x) {
-		return Dual(Math.log(x.a), x.b / x.a);
+		return Dual(Math.log(x.v), x.g / x.v);
 	},
 	exp: function(x) {
-		return Dual(Math.exp(x.a), x.b * Math.exp(x.a));
+		return Dual(Math.exp(x.v), x.g * Math.exp(x.v));
 	},
 	abs: function(x) {
-		var b;
-		if (x.a > 0) {
-			b = 1;
-		} else if (x.a < 0) {
-			b = -1;
+		var g;
+		if (x.v > 0) {
+			g = 1;
+		} else if (x.v < 0) {
+			g = -1;
 		} else {
-			b = NaN;
+			g = NaN;
 		}
-		return Dual(Math.abs(x.a), x.b * b);
+		return Dual(Math.abs(x.v), x.g * g);
 	},
 	PI: Dual(Math.PI),
 	E: Dual(Math.E),
@@ -188,7 +188,7 @@ function diff(f, at) {
 		console: console,
 	});
 	vm.runInContext('result = ('+generated+')(at)', context);
-	return context.result.b;
+	return context.result.g;
 }
 
 exports.diff = diff;
